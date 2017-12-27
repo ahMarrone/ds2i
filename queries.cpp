@@ -29,6 +29,7 @@ void op_perftest(IndexType const& index,
             do_not_optimize_away(result);
             double elapsed = double(get_time_usecs() - tick);
             if (run != 0) { // first run is not timed
+                std::cout << elapsed << std::endl;
                 query_times.push_back(elapsed);
             }
         }
