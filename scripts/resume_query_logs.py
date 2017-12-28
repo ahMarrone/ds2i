@@ -37,11 +37,17 @@ for query_time in query_log_file:
 
 # Ya tengo las tres listas con los tiempos de cada estrategia
 print "\t".join(QUERY_TYPES) + "\t" + "MIN\t MAX"
+min_counts = [0,0,0]
+max_counts = [0,0,0]
 for k in range(len(query_metadata[0])):
 	values = [l[k] for l in query_metadata]
 	minpos = values.index(min(values))
 	maxpos = values.index(max(values))
+	min_counts[minpos] += 1
+	max_counts[maxpos] += 1
 	print str(values[0]) + "\t" + str(values[1]) + "\t" + str(values[2]) + "\t" + str(minpos) + "\t" + str(maxpos)
+print "MIN counts -> " + '\t'.join(map(str, min_counts))
+print "MAX counts -> " + '\t'.join(map(str, max_counts))
 
 
 
