@@ -21,7 +21,6 @@ void op_perftest(IndexType const& index,
     using namespace ds2i;
 
     std::vector<double> query_times;
-
     for (size_t run = 0; run <= runs; ++run) {
         for (auto const& query: queries) {
             auto tick = get_time_usecs();
@@ -101,21 +100,21 @@ void perftest(const char* index_filename,
     logger() << "Performing " << type << " queries" << std::endl;
     for (auto const& t: query_types) {
         logger() << "Query type: " << t << std::endl;
-
+        int RUNS_NUMBER = 1;
         if (t == "and") {
-            op_perftest(index, and_query<false>(), queries, type, t, 2);
+            op_perftest(index, and_query<false>(), queries, type, t, RUNS_NUMBER);
         } else if (t == "and_freq") {
-            op_perftest(index, and_query<true>(), queries, type, t, 2);
+            op_perftest(index, and_query<true>(), queries, type, t, RUNS_NUMBER);
         } else if (t == "or") {
-            op_perftest(index, or_query<false>(), queries, type, t, 2);
+            op_perftest(index, or_query<false>(), queries, type, t, RUNS_NUMBER);
         } else if (t == "or_freq") {
-            op_perftest(index, or_query<true>(), queries, type, t, 2);
+            op_perftest(index, or_query<true>(), queries, type, t, RUNS_NUMBER);
         } else if (t == "wand" && wand_data_filename) {
-            op_perftest(index, wand_query(wdata, 10), queries, type, t, 2);
+            op_perftest(index, wand_query(wdata, 10), queries, type, t, RUNS_NUMBER);
         } else if (t == "ranked_and" && wand_data_filename) {
-            op_perftest(index, ranked_and_query(wdata, 10), queries, type, t, 2);
+            op_perftest(index, ranked_and_query(wdata, 10), queries, type, t, RUNS_NUMBER);
         } else if (t == "maxscore" && wand_data_filename) {
-            op_perftest(index, maxscore_query(wdata, 10), queries, type, t, 2);
+            op_perftest(index, maxscore_query(wdata, 10), queries, type, t, RUNS_NUMBER);
         } else {
             logger() << "Unsupported query type: " << t << std::endl;
         }
