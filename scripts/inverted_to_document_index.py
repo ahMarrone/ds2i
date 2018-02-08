@@ -4,8 +4,6 @@ from ast import literal_eval as make_tuple
 path_inverted_text_file = sys.argv[1]
 output_document_lengths_filename = sys.argv[2]
 
-path_output_query_file = "queries_ids.txt"
-
 
 inverted_file = open(path_inverted_text_file, "r")
 doclengths_file = open(output_document_lengths_filename, "w")
