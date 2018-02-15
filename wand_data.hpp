@@ -38,7 +38,8 @@ namespace ds2i {
                 for (size_t i = 0; i < seq.docs.size(); ++i) {
                     uint64_t docid = *(seq.docs.begin() + i);
                     uint64_t freq = *(seq.freqs.begin() + i);
-                    float score = Scorer::doc_term_weight(freq, norm_lens[docid]);
+                    //float score = Scorer::doc_term_weight(freq, norm_lens[docid]);
+                    float score = freq;
                     max_score = std::max(max_score, score);
                 }
                 max_term_weight.push_back(max_score);
@@ -46,7 +47,9 @@ namespace ds2i {
                     logger() << max_term_weight.size() << " list processed" << std::endl;
                 }
             }
-            logger() << max_term_weight.size() << " list processed" << std::endl;
+            logger() << max_term_weight.size() << " list processed" << std::endl;	     for (auto & element: max_term_weight){
+		std::cout << element << std::endl; 
+	    }
 
             m_norm_lens.steal(norm_lens);
             m_max_term_weight.steal(max_term_weight);

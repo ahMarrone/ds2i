@@ -1,12 +1,12 @@
 idx_types="ef single uniform opt block_optpfor block_varint block_interpolative block_mixed"
-query_types="or_freq:wand:maxscore"
+query_types="maxscore_dyn"
 
 
-COLLECTION_NAME="clueweb_collection"
-QUERY_FILEPREFIX="queries"
+COLLECTION_NAME=$1     #"clueweb_collection"
+QUERY_FILEPREFIX=$2    #"queries"
 
 
-construct_indexes=false
+construct_indexes=true
 
 if [ ! -d ./indexes ] 
 then

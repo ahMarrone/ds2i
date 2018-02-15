@@ -13,7 +13,7 @@ query_log_file_path = sys.argv[3]
 ########
 
 QUERY_TYPES = ["or_freq", "wand", "maxscore"]
-N_QUERIES = 1000
+N_QUERIES = int(sys.argv[4])
 
 ## lexicon 
 lexicon_data = []
@@ -64,6 +64,7 @@ for k in range(len(query_metadata[0])):
 	min_counts[minpos] += 1
 	max_counts[maxpos] += 1
 	term_id = int(queries_list[k][0])
+        #import pdb; pdb.set_trace()
 	postings_lengths = [lexicon_data[int(entry)][1] for entry in queries_list[k]]
 	#print term_id
 	#import pdb; pdb.set_trace()
