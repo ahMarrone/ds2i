@@ -558,6 +558,16 @@ namespace ds2i {
                     if (ordered_enums[i]->docs_enum.docid() < next_doc) {
                         next_doc = ordered_enums[i]->docs_enum.docid();
                     }
+                }for (size_t i = non_essential_lists; i < ordered_enums.size(); ++i) {
+                    if (ordered_enums[i]->docs_enum.docid() == cur_doc) {
+                        //score += ordered_enums[i]->q_weight * scorer_type::doc_term_weight
+                        //    (ordered_enums[i]->docs_enum.freq(), norm_len);
+                        score += ordered_enums[i]->q_weight * ordered_enums[i]->docs_enum.freq();
+                        ordered_enums[i]->docs_enum.next();
+                    }
+                    if (ordered_enums[i]->docs_enum.docid() < next_doc) {
+                        next_doc = ordered_enums[i]->docs_enum.docid();
+                    }
                 }
 
                 // try to complete evaluation with non-essential lists
@@ -630,20 +640,37 @@ namespace ds2i {
             struct scored_enum {
                 enum_type docs_enum;
                 float q_weight;
-                std::vector<float> max_weights;
+                uint64_t term_id;
+                wand_data<scorer_type> const* l_wand_data;
+                int posting_list_cursor;
                 int upper_bound_cursor;
 
                 float get_current_max_weight(){
-                    if (this->upper_bound_cursor < this->max_weights.size()){
-                        return this->max_weights[this->upper_bound_cursor];
+                    upper_bound_cursor = 0;
+                    std::cout << "Get MAX WEIGHT" << std::endl;
+                    std::cout << term_id << std::endl;
+                    std::cout << this->docs_enum.position() << std::endl;
+                    std::cout << posting_list_cursor << std::endl;
+                    while (l_wand_data->max_term_weight(l_wand_data->upperbounds_offset(term_id)+upper_bound_cursor) < posting_list_cursor){
+                        std::cout << "Move ub cursor" << std::endl;
+                        upper_bound_cursor += 2;
                     }
-                    return 0;
+                    if (posting_list_cursor > this->docs_enum.size())
+                        std::cout << "SE PASA!" << std::endl;
+                    std::cout << "MAX WEIGHT" << std::endl;
+                    std::cout << upper_bound_cursor << std::endl;
+                    std::cout << l_wand_data->max_term_weight(l_wand_data->upperbounds_offset(term_id)+upper_bound_cursor+1) << std::endl;
+                    return l_wand_data->max_term_weight(l_wand_data->upperbounds_offset(term_id)+upper_bound_cursor+1);
+                    /*return l_wand_data->upperbounds_offset(term_id);
+                    if (this->posting_list_cursor < this->dyn_upper_bounds.size()){
+                        return this->dyn_upper_bounds[this->posting_list_cursor];
+                    }*/
                 }
 
 
                 void next(){
                     this->docs_enum.next();
-                    this->upper_bound_cursor++;
+                    this->posting_list_cursor++;
                 }
 
 
@@ -651,7 +678,7 @@ namespace ds2i {
                     this->docs_enum.next_geq(doc_id);
                     //std::cout << "GEQ position" << std::endl;
                     //std::cout << this->docs_enum.position() << std::endl;
-                    this->upper_bound_cursor = this->docs_enum.position();
+                    this->posting_list_cursor = this->docs_enum.position();
                 }
                 
             };
@@ -671,14 +698,18 @@ namespace ds2i {
                 //  (term.second, list.size(), num_docs);
                 auto q_weight = term.second;
                 //auto max_weight = q_weight * m_wdata->max_term_weight(term.first);
-                /*std::cout << "Printing data..." << std::endl;
-                std::cout << term.first << std::endl;
-                std::cout << term.second << std::endl;
-                std::cout << q_weight  << std::endl;
-                std::cout << m_wdata->max_term_weight(term.first) << std::endl;*/
+
+                std::cout << "Printing data..." << std::endl;
+                std::cout << m_wdata->max_term_weight(term.first) << std::endl;
+                std::cout << m_wdata->upperbounds_offset(term.first) << std::endl;
+                //std::vector<int> term_upper_bounds = m_wdata->get_upper_bounds_vector(start_offset, end);
+                //std::cout << term_upper_bounds[1] << std::endl;
+                //std::cout << m_wdata->get_max_term_weight() << std::endl;
                 enums.push_back(scored_enum {std::move(list), 
-                                            q_weight, 
-                                            max_weights_vectors[idx], 
+                                            q_weight,
+                                            term.first, 
+                                            m_wdata, 
+                                            0,
                                             0
                                 });
                 idx++;
