@@ -505,8 +505,9 @@ namespace ds2i {
 
             for (auto term: query_term_freqs) {
                 auto list = index[term.first];
-                auto q_weight = scorer_type::query_term_weight
-                    (term.second, list.size(), num_docs);
+                //auto q_weight = scorer_type::query_term_weight
+                //    (term.second, list.size(), num_docs);
+                auto q_weight = term.second;
                 auto max_weight = q_weight * m_wdata->max_term_weight(term.first);
                 enums.push_back(scored_enum {std::move(list), q_weight, max_weight});
             }
@@ -544,8 +545,9 @@ namespace ds2i {
                 uint64_t next_doc = index.num_docs();
                 for (size_t i = non_essential_lists; i < ordered_enums.size(); ++i) {
                     if (ordered_enums[i]->docs_enum.docid() == cur_doc) {
-                        score += ordered_enums[i]->q_weight * scorer_type::doc_term_weight
-                            (ordered_enums[i]->docs_enum.freq(), norm_len);
+                        //score += ordered_enums[i]->q_weight * scorer_type::doc_term_weight
+                        //    (ordered_enums[i]->docs_enum.freq(), norm_len);
+                        score += ordered_enums[i]->q_weight * ordered_enums[i]->docs_enum.freq();
                         ordered_enums[i]->docs_enum.next();
                     }
                     if (ordered_enums[i]->docs_enum.docid() < next_doc) {
@@ -560,8 +562,9 @@ namespace ds2i {
                     }
                     ordered_enums[i]->docs_enum.next_geq(cur_doc);
                     if (ordered_enums[i]->docs_enum.docid() == cur_doc) {
-                        score += ordered_enums[i]->q_weight * scorer_type::doc_term_weight
-                            (ordered_enums[i]->docs_enum.freq(), norm_len);
+                        //score += ordered_enums[i]->q_weight * scorer_type::doc_term_weight
+                        //    (ordered_enums[i]->docs_enum.freq(), norm_len);
+                        score += ordered_enums[i]->q_weight * ordered_enums[i]->docs_enum.freq();
                     }
                 }
 
@@ -577,6 +580,12 @@ namespace ds2i {
             }
 
             m_topk.finalize();
+
+            std::cout << "Showing topk scores..." << std::endl;
+            for (auto score: m_topk.topk()){
+                std::cout << score << std::endl;
+            }
+
             return m_topk.topk().size();
         }
 
