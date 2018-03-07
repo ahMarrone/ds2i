@@ -227,8 +227,9 @@ namespace ds2i {
 
             for (auto term: query_term_freqs) {
                 auto list = index[term.first];
-                auto q_weight = scorer_type::query_term_weight
-                    (term.second, list.size(), num_docs);
+                //auto q_weight = scorer_type::query_term_weight
+                //    (term.second, list.size(), num_docs);
+                auto q_weight = term.second;
                 auto max_weight = q_weight * m_wdata->max_term_weight(term.first);
                 enums.push_back(scored_enum {std::move(list), q_weight, max_weight});
             }
@@ -278,8 +279,9 @@ namespace ds2i {
                         if (en->docs_enum.docid() != pivot_id) {
                             break;
                         }
-                        score += en->q_weight * scorer_type::doc_term_weight
-                            (en->docs_enum.freq(), norm_len);
+                        //score += en->q_weight * scorer_type::doc_term_weight
+                        //    (en->docs_enum.freq(), norm_len);
+                        score += en->q_weight * en->docs_enum.freq();
                         en->docs_enum.next();
                     }
 
@@ -305,6 +307,12 @@ namespace ds2i {
             }
 
             m_topk.finalize();
+
+            std::cout << "Showing topk scores..." << std::endl;
+            for (auto score: m_topk.topk()){
+                std::cout << score << std::endl;
+            }
+
             return m_topk.topk().size();
         }
 
