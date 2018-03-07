@@ -33,23 +33,31 @@ namespace ds2i {
 
             logger() << "Storing max weight for each list..." << std::endl;
             std::vector<float> max_term_weight;
+            std::vector<float> upperbounds_offset;
+            int upp_offset = 0;
             for (auto const& seq: coll) {
-                float max_score = 0;
-                for (size_t i = 0; i < seq.docs.size(); ++i) {
-                    uint64_t docid = *(seq.docs.begin() + i);
-                    uint64_t freq = *(seq.freqs.begin() + i);
-                    float score = Scorer::doc_term_weight(freq, norm_lens[docid]);
-                    max_score = std::max(max_score, score);
+                int step = 1;
+                upperbounds_offset.push_back(max_term_weight.size());
+                for (size_t i = 0; i < seq.docs.size(); i += step) {
+                    float max_score = 0;
+                    for (size_t j = i; j < seq.docs.size(); j++){
+                        uint64_t docid = *(seq.docs.begin() + j);
+                        uint64_t freq = *(seq.freqs.begin() + j);
+                        //float score = Scorer::doc_term_weight(freq, norm_lens[docid]);
+                        float score = freq;
+                        max_score = std::max(max_score, score);
+                    }
+                    max_term_weight.push_back(i);
+                    max_term_weight.push_back(max_score);
                 }
-                max_term_weight.push_back(max_score);
                 if ((max_term_weight.size() % 1000000) == 0) {
                     logger() << max_term_weight.size() << " list processed" << std::endl;
                 }
             }
             logger() << max_term_weight.size() << " list processed" << std::endl;
-
             m_norm_lens.steal(norm_lens);
             m_max_term_weight.steal(max_term_weight);
+            m_upperbounds_offset.steal(upperbounds_offset);
         }
 
         float norm_len(uint64_t doc_id) const
@@ -62,11 +70,34 @@ namespace ds2i {
             return m_max_term_weight[term_id];
         }
 
+
+        std::vector<float> get_upper_bounds_vector(uint64_t term_id) const
+        {
+            std::vector<float> result;
+            int startPos = m_upperbounds_offset[term_id];
+            int endPos = ( term_id < (m_upperbounds_offset.size())-1 ) 
+                        ? m_upperbounds_offset[term_id+1]
+                        : m_max_term_weight.size();
+            for(int i = startPos; i < endPos; i = i + 2) {
+                //std::cout << i << " inject: " << max_term_weight(i) << " " << max_term_weight(i+1)  << std::endl;
+                result.push_back(max_term_weight(i));
+                result.push_back(max_term_weight(i+1));
+            }
+            return result;
+        }
+
+
+        int upperbounds_offset(uint64_t term_id) const{
+            return m_upperbounds_offset[term_id];
+        }
+
         void swap(wand_data& other)
         {
             m_norm_lens.swap(other.m_norm_lens);
             m_max_term_weight.swap(other.m_max_term_weight);
+            m_upperbounds_offset.swap(other.m_upperbounds_offset);
         }
+
 
         template <typename Visitor>
         void map(Visitor& visit)
@@ -74,12 +105,14 @@ namespace ds2i {
             visit
                 (m_norm_lens, "m_norm_lens")
                 (m_max_term_weight, "m_max_term_weight")
+                (m_upperbounds_offset, "m_upperbounds_offset")
                 ;
         }
 
     private:
         succinct::mapper::mappable_vector<float> m_norm_lens;
         succinct::mapper::mappable_vector<float> m_max_term_weight;
+        succinct::mapper::mappable_vector<float> m_upperbounds_offset;
     };
 
 }
