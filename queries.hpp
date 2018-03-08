@@ -518,7 +518,6 @@ namespace ds2i {
                 auto q_weight = term.second;
                 //auto max_weight = q_weight * m_wdata->max_term_weight(term.first);
                 auto max_weight = q_weight * m_wdata->get_upper_bounds_vector(term.first)[1];
-                std::cout << "MAX WEIGHT ->" << term.first << " " << max_weight << std::endl;
                 enums.push_back(scored_enum {std::move(list), q_weight, max_weight});
             }
 

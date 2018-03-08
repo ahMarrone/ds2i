@@ -28,7 +28,7 @@ void op_perftest(IndexType const& index,
             do_not_optimize_away(result);
             double elapsed = double(get_time_usecs() - tick);
             if (run != 0) { // first run is not timed
-                std::cout << elapsed << std::endl;
+                //std::cout << elapsed << std::endl;
                 query_times.push_back(elapsed);
             }
         }
@@ -100,7 +100,7 @@ void perftest(const char* index_filename,
     logger() << "Performing " << type << " queries" << std::endl;
     for (auto const& t: query_types) {
         logger() << "Query type: " << t << std::endl;
-        int RUNS_NUMBER = 1;
+        int RUNS_NUMBER = 2;
         int K = 10;
         if (t == "and") {
             op_perftest(index, and_query<false>(), queries, type, t, RUNS_NUMBER);
