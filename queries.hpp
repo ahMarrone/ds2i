@@ -518,6 +518,7 @@ namespace ds2i {
                 auto q_weight = term.second;
                 //auto max_weight = q_weight * m_wdata->max_term_weight(term.first);
                 auto max_weight = q_weight * m_wdata->get_upper_bounds_vector(term.first)[1];
+                //std::cout << "MAX WEIGHT ->" << term.first << " " << max_weight << std::endl;
                 enums.push_back(scored_enum {std::move(list), q_weight, max_weight});
             }
 
@@ -546,12 +547,14 @@ namespace ds2i {
                                      return lhs.docs_enum.docid() < rhs.docs_enum.docid();
                                  })
                 ->docs_enum.docid();
-
+            //std::cout << "first docid" << cur_doc << std::endl;
             while (non_essential_lists < ordered_enums.size() &&
                    cur_doc < index.num_docs()) {
                 float score = 0;
                 float norm_len = m_wdata->norm_len(cur_doc);
                 uint64_t next_doc = index.num_docs();
+                //std::cout << "Scoring: " << std::endl;
+                //std::cout << cur_doc << std::endl;
                 for (size_t i = non_essential_lists; i < ordered_enums.size(); ++i) {
                     if (ordered_enums[i]->docs_enum.docid() == cur_doc) {
                         //score += ordered_enums[i]->q_weight * scorer_type::doc_term_weight
@@ -559,8 +562,10 @@ namespace ds2i {
                         score += ordered_enums[i]->q_weight * ordered_enums[i]->docs_enum.freq();
                         ordered_enums[i]->docs_enum.next();
                     }
+                    //std::cout << "next doc check" << next_doc << std::endl;
                     if (ordered_enums[i]->docs_enum.docid() < next_doc) {
                         next_doc = ordered_enums[i]->docs_enum.docid();
+                        //std::cout << "next " << next_doc << std::endl;
                     }
                 }
 
@@ -578,6 +583,7 @@ namespace ds2i {
                 }
 
                 if (m_topk.insert(score)) {
+                    //std::cout << "insert " << score << "  " << cur_doc << std::endl; 
                     // update non-essential lists
                     while (non_essential_lists < ordered_enums.size() &&
                            !m_topk.would_enter(upper_bounds[non_essential_lists])) {
@@ -637,11 +643,18 @@ namespace ds2i {
                 int upper_bound_cursor;
 
                 float get_current_max_weight(){
-                    /*while (this->max_weights[this->upper_bound_cursor] < this->docs_enum.position()){
-                        this->upper_bound_cursor += 2; // move two steps to right -> ublist is => (pos, ub)
-                    }*/
-                    //std::cout << "CURRENT MAX WEIGHT: " <<  this->max_weights[this->docs_enum.position()] << std::endl;
-                    return this->max_weights[this->docs_enum.position()]; // return ub
+                    //std::cout << "CURRENT DOC " <<  this->docs_enum.docid() << std::endl;
+                    //std::cout << this->docs_enum.position() << std::endl;
+                    //std::cout << this->docs_enum.docid() << std::endl;
+                    while (
+                            this->docs_enum.position() < this->docs_enum.size() &&
+                            this->max_weights[this->upper_bound_cursor] < this->docs_enum.position()
+                    ){
+                            this->upper_bound_cursor += 2; // move two steps to right -> ublist is => (pos, ub)
+                           //std::cout << this->upper_bound_cursor << std::endl;
+                    }
+                    //std::cout << "CURRENT MAX WEIGHT: " <<  this->max_weights[this->upper_bound_cursor+1] << std::endl;
+                    return this->max_weights[this->upper_bound_cursor+1]; // return ub
                 }
 
 
@@ -676,6 +689,7 @@ namespace ds2i {
                 std::cout << term.first << std::endl;
                 std::cout << term.second << std::endl;
                 std::cout << q_weight  << std::endl;*/
+                //std::cout << "MAX WEIGHT ->" << term.first << " " << m_wdata->get_upper_bounds_vector(term.first)[1] << std::endl;
                 enums.push_back(scored_enum {std::move(list), 
                                             q_weight, 
                                             m_wdata->get_upper_bounds_vector(term.first), 
@@ -695,10 +709,11 @@ namespace ds2i {
                       [](scored_enum* lhs, scored_enum* rhs) {
                           return lhs->get_current_max_weight() < rhs->get_current_max_weight();
                       });
-	    /*std::cout << "Ordered enums..." << std::endl;
-	    for (auto& en: ordered_enums){
+	        /*std::cout << "Ordered enums..." << std::endl;
+	        for (auto& en: ordered_enums){
                 std::cout << en->get_current_max_weight() << std::endl;
-	    }*/
+	        }*/
+            //std::cout << "accum enums..." << std::endl;
             std::vector<float> upper_bounds(ordered_enums.size());
             upper_bounds[0] = ordered_enums[0]->get_current_max_weight();
             for (size_t i = 1; i < ordered_enums.size(); ++i) {
@@ -716,25 +731,28 @@ namespace ds2i {
                                      return lhs.docs_enum.docid() < rhs.docs_enum.docid();
                                  })
                 ->docs_enum.docid();
-
+            //std::cout << "first docid" << cur_doc << std::endl;
             while (non_essential_lists < ordered_enums.size() &&
                    cur_doc < index.num_docs()) {
                 float score = 0;
                 float norm_len = m_wdata->norm_len(cur_doc);
+                uint64_t next_doc = index.num_docs();
                 //std::cout << "Scoring: " << std::endl;
                 //std::cout << cur_doc << std::endl;
-                uint64_t next_doc = index.num_docs();
                 for (size_t i = non_essential_lists; i < ordered_enums.size(); ++i) {
                     if (ordered_enums[i]->docs_enum.docid() == cur_doc) {
+                        //std::cout << "Add score " << i << cur_doc << std::endl;
+                        //std::cout << ordered_enums[i]->docs_enum.position() << std::endl;
                         //score += ordered_enums[i]->q_weight * scorer_type::doc_term_weight
                         //    (ordered_enums[i]->docs_enum.freq(), norm_len);
                         score += ordered_enums[i]->q_weight * ordered_enums[i]->docs_enum.freq();
-                        //std::cout << "Add: " << std::endl;
-                        //std::cout <<  ordered_enums[i]->docs_enum.freq() << std::endl;
-                        ordered_enums[i]->next();
+                        ordered_enums[i]->docs_enum.next();
+                        //std::cout << ordered_enums[i]->docs_enum.position() << std::endl;
                     }
+                    //std::cout << "next doc check" << next_doc << std::endl;
                     if (ordered_enums[i]->docs_enum.docid() < next_doc) {
                         next_doc = ordered_enums[i]->docs_enum.docid();
+                        //std::cout << "next " << next_doc << std::endl;
                     }
                 }
 
@@ -743,19 +761,37 @@ namespace ds2i {
                     if (!m_topk.would_enter(score + upper_bounds[i])) {
                         break;
                     }
-                    //std::cout << "GEQ!!" << std::endl;
-                    ordered_enums[i]->next_geq(cur_doc);
+                    ordered_enums[i]->docs_enum.next_geq(cur_doc);
                     if (ordered_enums[i]->docs_enum.docid() == cur_doc) {
                         //score += ordered_enums[i]->q_weight * scorer_type::doc_term_weight
                         //    (ordered_enums[i]->docs_enum.freq(), norm_len);
                         score += ordered_enums[i]->q_weight * ordered_enums[i]->docs_enum.freq();
+                        ordered_enums[i]->docs_enum.next();
                         //std::cout << "Add Non-essential: " << std::endl;
                         //std::cout <<  ordered_enums[i]->docs_enum.freq() << std::endl;
                     }
                 }
 
+                /*std::cout << "Upperbounds..." << std::endl;
+                for (auto n: upper_bounds){
+                        std::cout << n << std::endl;
+                }*/
 
-                //////////// AGREGADO!!!!! ///////////////
+                non_essential_lists = 0;
+                /*if (cur_doc == 9826){
+                    std::cout << "SCORE DUPL" << cur_doc << score << std::endl;
+                }*/
+                if (m_topk.insert(score)){
+                    //std::cout << "insert " << score << "  " << cur_doc << " " << m_topk.topk().size() << std::endl; 
+                }
+                 while (non_essential_lists < ordered_enums.size() &&
+                        !m_topk.would_enter(upper_bounds[non_essential_lists])) {
+                        //std::cout << "Updating non-essential" << std::endl;
+                        non_essential_lists += 1;
+                        //std::cout << non_essential_lists << std::endl;
+                }
+
+                 //////////// AGREGADO!!!!! ///////////////
                 // sort enumerators by increasing maxscore
                 std::sort(ordered_enums.begin(), ordered_enums.end(),
                     [](scored_enum* lhs, scored_enum* rhs) {
@@ -771,37 +807,6 @@ namespace ds2i {
                     upper_bounds[i] = upper_bounds[i - 1] + ordered_enums[i]->get_current_max_weight();
                 }
 
-                /*std::cout << "Upperbounds..." << std::endl;
-                for (auto n: upper_bounds){
-                        std::cout << n << std::endl;
-                }*/
-
-                non_essential_lists = 0;
-                m_topk.insert(score);
-                 while (non_essential_lists < ordered_enums.size() &&
-                        !m_topk.would_enter(upper_bounds[non_essential_lists])) {
-                        //std::cout << "Updating non-essential" << std::endl;
-                        non_essential_lists += 1;
-                        //std::cout << non_essential_lists << std::endl;
-                }
-                /*if (m_topk.insert(score)) {
-                    std::cout << "Inserted score: " << std::endl;
-                    std::cout << score << std::endl;
-                    // update non-essential lists
-                    while (non_essential_lists < ordered_enums.size() &&
-                        !m_topk.would_enter(upper_bounds[non_essential_lists])) {
-                        std::cout << "Updating non-essential" << std::endl;
-                        non_essential_lists += 1;
-                        std::cout << non_essential_lists << std::endl;
-                    }
-                } else {
-                    std::cout << "Score ignored:" << std::endl;
-                    std::cout << score << std::endl;
-                }*/
-                /*std::cout << "Doc" << std::endl;
-                std::cout << cur_doc << std::endl;
-                std::cout << score << std::endl;*/
-                
                 cur_doc = next_doc;
             }
 

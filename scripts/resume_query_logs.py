@@ -12,8 +12,8 @@ query_log_file_path = sys.argv[3]
 
 ########
 
-QUERY_TYPES = ["or_freq", "wand", "maxscore"]
-N_QUERIES = 1000
+QUERY_TYPES = ["or_freq", "maxscore", "maxscore_dyn"]
+N_QUERIES = 500
 
 ## lexicon 
 lexicon_data = []

@@ -2,20 +2,24 @@ import sys
 from struct import *
 from ast import literal_eval as make_tuple  
 
-collection_size = 3229026
-
 # Indice en texto plano, una linea por cada posting de termino
 # Formato de postings:
 # 		(doc_id, tf) (doc_id, tf)
 #		(doc_id, tf)
 # 		...
-path_inverted_index_file = "/home/agustin/Documentos/Tesis/terrier-4.0/cluewebdata/ClueWeb12_plain_index_clean.txt"
+#path_inverted_index_file = "/home/agustin/Documentos/Tesis/clueweb3M/textfiles/ClueWeb12_plain_index_clean.txt"
+path_inverted_index_file = sys.argv[1]
 # Archivo en texto plano.
-# Contiene linea por linea, tamaño de cada documento (ordenado por orden de indexacion)
-path_document_index_file = "/home/agustin/Documentos/Tesis/terrier-4.0/cluewebdata/ClueWeb12_plain_documentindex_onlysizes.txt"
+# Contiene linea por linea, tamano de cada documento (ordenado por orden de indexacion)
+#path_document_index_file = "/home/agustin/Documentos/Tesis/clueweb3M/textfiles/ClueWeb12_plain_documentindex_onlysizes.txt"
+path_document_index_file = sys.argv[2]
+
+#collection_size = 3229026
+collection_size = int(sys.argv[3])
 
 
-out_collection_name = "clueweb_collection"
+#out_collection_name = "clueweb_collection"
+out_collection_name = sys.argv[4]
 
 # Input files
 
