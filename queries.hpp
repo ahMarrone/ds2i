@@ -383,8 +383,9 @@ namespace ds2i {
                     float norm_len = m_wdata->norm_len(candidate);
                     float score = 0;
                     for (i = 0; i < enums.size(); ++i) {
-                        score += enums[i].q_weight * scorer_type::doc_term_weight
-                            (enums[i].docs_enum.freq(), norm_len);
+                        //score += enums[i].q_weight * scorer_type::doc_term_weight
+                        //    (enums[i].docs_enum.freq(), norm_len);
+                        score += enums[i].docs_enum.freq();
                     }
 
                     m_topk.insert(score);
@@ -395,6 +396,12 @@ namespace ds2i {
             }
 
             m_topk.finalize();
+
+            std::cout << "Showing topk scores..." << std::endl;
+            for (auto score: m_topk.topk()){
+                std::cout << score << std::endl;
+            }
+
             return m_topk.topk().size();
         }
 
@@ -456,8 +463,9 @@ namespace ds2i {
                 uint64_t next_doc = index.num_docs();
                 for (size_t i = 0; i < enums.size(); ++i) {
                     if (enums[i].docs_enum.docid() == cur_doc) {
-                        score += enums[i].q_weight * scorer_type::doc_term_weight
-                            (enums[i].docs_enum.freq(), norm_len);
+                        //score += enums[i].q_weight * scorer_type::doc_term_weight
+                        //    (enums[i].docs_enum.freq(), norm_len);
+                        score += enums[i].docs_enum.freq();
                         enums[i].docs_enum.next();
                     }
                     if (enums[i].docs_enum.docid() < next_doc) {
@@ -470,6 +478,12 @@ namespace ds2i {
             }
 
             m_topk.finalize();
+
+            std::cout << "Showing topk scores..." << std::endl;
+            for (auto score: m_topk.topk()){
+                std::cout << score << std::endl;
+            }
+
             return m_topk.topk().size();
         }
 
@@ -583,7 +597,7 @@ namespace ds2i {
                 }
 
                 if (m_topk.insert(score)) {
-                    //std::cout << "insert " << score << "  " << cur_doc << std::endl; 
+                    //std::cout << "insert " << score << "  " << cur_doc << " " << m_topk.topk().size() << std::endl; 
                     // update non-essential lists
                     while (non_essential_lists < ordered_enums.size() &&
                            !m_topk.would_enter(upper_bounds[non_essential_lists])) {
@@ -758,9 +772,9 @@ namespace ds2i {
 
                 // try to complete evaluation with non-essential lists
                 for (size_t i = non_essential_lists - 1; i + 1 > 0; --i) {
-                    if (!m_topk.would_enter(score + upper_bounds[i])) {
+                    /*if (!m_topk.would_enter(score + upper_bounds[i])) {
                         break;
-                    }
+                    }*/
                     ordered_enums[i]->docs_enum.next_geq(cur_doc);
                     if (ordered_enums[i]->docs_enum.docid() == cur_doc) {
                         //score += ordered_enums[i]->q_weight * scorer_type::doc_term_weight
@@ -778,9 +792,7 @@ namespace ds2i {
                 }*/
 
                 non_essential_lists = 0;
-                /*if (cur_doc == 9826){
-                    std::cout << "SCORE DUPL" << cur_doc << score << std::endl;
-                }*/
+
                 if (m_topk.insert(score)){
                     //std::cout << "insert " << score << "  " << cur_doc << " " << m_topk.topk().size() << std::endl; 
                 }

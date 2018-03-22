@@ -23,12 +23,16 @@ void op_perftest(IndexType const& index,
     std::vector<double> query_times;
     for (size_t run = 0; run <= runs; ++run) {
         for (auto const& query: queries) {
+            std::cout << "query: " << std::endl;
+            for (auto q: query){
+                std::cout << q << std::endl;
+            }
             auto tick = get_time_usecs();
             uint64_t result = query_op(index, query);
             do_not_optimize_away(result);
             double elapsed = double(get_time_usecs() - tick);
             if (run != 0) { // first run is not timed
-                std::cout << elapsed << std::endl;
+                //std::cout << elapsed << std::endl;
                 query_times.push_back(elapsed);
             }
         }
@@ -114,6 +118,8 @@ void perftest(const char* index_filename,
             op_perftest(index, wand_query(wdata, K), queries, type, t, RUNS_NUMBER);
         } else if (t == "ranked_and" && wand_data_filename) {
             op_perftest(index, ranked_and_query(wdata, K), queries, type, t, RUNS_NUMBER);
+        } else if (t == "ranked_or" && wand_data_filename) {
+            op_perftest(index, ranked_or_query(wdata, K), queries, type, t, RUNS_NUMBER);
         } else if (t == "maxscore" && wand_data_filename) {
             op_perftest(index, maxscore_query(wdata, K), queries, type, t, RUNS_NUMBER);
         } else if (t == "maxscore_dyn" && wand_data_filename) {
