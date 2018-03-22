@@ -383,8 +383,9 @@ namespace ds2i {
                     float norm_len = m_wdata->norm_len(candidate);
                     float score = 0;
                     for (i = 0; i < enums.size(); ++i) {
-                        score += enums[i].q_weight * scorer_type::doc_term_weight
-                            (enums[i].docs_enum.freq(), norm_len);
+                        //score += enums[i].q_weight * scorer_type::doc_term_weight
+                        //    (enums[i].docs_enum.freq(), norm_len);
+                        score += enums[i].docs_enum.freq();
                     }
 
                     m_topk.insert(score);
@@ -395,6 +396,12 @@ namespace ds2i {
             }
 
             m_topk.finalize();
+
+            std::cout << "Showing topk scores..." << std::endl;
+            for (auto score: m_topk.topk()){
+                std::cout << score << std::endl;
+            }
+
             return m_topk.topk().size();
         }
 
@@ -456,8 +463,9 @@ namespace ds2i {
                 uint64_t next_doc = index.num_docs();
                 for (size_t i = 0; i < enums.size(); ++i) {
                     if (enums[i].docs_enum.docid() == cur_doc) {
-                        score += enums[i].q_weight * scorer_type::doc_term_weight
-                            (enums[i].docs_enum.freq(), norm_len);
+                        //score += enums[i].q_weight * scorer_type::doc_term_weight
+                        //    (enums[i].docs_enum.freq(), norm_len);
+                        score += enums[i].docs_enum.freq();
                         enums[i].docs_enum.next();
                     }
                     if (enums[i].docs_enum.docid() < next_doc) {
@@ -470,6 +478,12 @@ namespace ds2i {
             }
 
             m_topk.finalize();
+
+            std::cout << "Showing topk scores..." << std::endl;
+            for (auto score: m_topk.topk()){
+                std::cout << score << std::endl;
+            }
+
             return m_topk.topk().size();
         }
 

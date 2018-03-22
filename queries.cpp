@@ -113,6 +113,8 @@ void perftest(const char* index_filename,
             op_perftest(index, wand_query(wdata, 10), queries, type, t, 2);
         } else if (t == "ranked_and" && wand_data_filename) {
             op_perftest(index, ranked_and_query(wdata, 10), queries, type, t, 2);
+        } else if (t == "ranked_or" && wand_data_filename) {
+            op_perftest(index, ranked_or_query(wdata, 10), queries, type, t, 2);
         } else if (t == "maxscore" && wand_data_filename) {
             op_perftest(index, maxscore_query(wdata, 10), queries, type, t, 2);
         } else {
