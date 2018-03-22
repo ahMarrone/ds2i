@@ -24,6 +24,10 @@ void op_perftest(IndexType const& index,
 
     for (size_t run = 0; run <= runs; ++run) {
         for (auto const& query: queries) {
+            std::cout << "query: " << std::endl;
+            for (auto q: query){
+                std::cout << q << std::endl;
+            }
             auto tick = get_time_usecs();
             uint64_t result = query_op(index, query);
             do_not_optimize_away(result);
@@ -100,23 +104,24 @@ void perftest(const char* index_filename,
     logger() << "Performing " << type << " queries" << std::endl;
     for (auto const& t: query_types) {
         logger() << "Query type: " << t << std::endl;
-
+        int RUNS_NUMBER = 1;
+        int K = 10;
         if (t == "and") {
-            op_perftest(index, and_query<false>(), queries, type, t, 2);
+            op_perftest(index, and_query<false>(), queries, type, t, RUNS_NUMBER);
         } else if (t == "and_freq") {
-            op_perftest(index, and_query<true>(), queries, type, t, 2);
+            op_perftest(index, and_query<true>(), queries, type, t, RUNS_NUMBER);
         } else if (t == "or") {
-            op_perftest(index, or_query<false>(), queries, type, t, 2);
+            op_perftest(index, or_query<false>(), queries, type, t, RUNS_NUMBER);
         } else if (t == "or_freq") {
-            op_perftest(index, or_query<true>(), queries, type, t, 2);
+            op_perftest(index, or_query<true>(), queries, type, t, RUNS_NUMBER);
         } else if (t == "wand" && wand_data_filename) {
-            op_perftest(index, wand_query(wdata, 10), queries, type, t, 2);
+            op_perftest(index, wand_query(wdata, K), queries, type, t, RUNS_NUMBER);
         } else if (t == "ranked_and" && wand_data_filename) {
-            op_perftest(index, ranked_and_query(wdata, 10), queries, type, t, 2);
+            op_perftest(index, ranked_and_query(wdata, K), queries, type, t, RUNS_NUMBER);
         } else if (t == "ranked_or" && wand_data_filename) {
-            op_perftest(index, ranked_or_query(wdata, 10), queries, type, t, 2);
+            op_perftest(index, ranked_or_query(wdata, K), queries, type, t, RUNS_NUMBER);
         } else if (t == "maxscore" && wand_data_filename) {
-            op_perftest(index, maxscore_query(wdata, 10), queries, type, t, 2);
+            op_perftest(index, maxscore_query(wdata, K), queries, type, t, RUNS_NUMBER);
         } else {
             logger() << "Unsupported query type: " << t << std::endl;
         }
