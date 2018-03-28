@@ -37,7 +37,7 @@ namespace ds2i {
             std::vector<float> upperbounds_offset;
             int upp_offset = 0;
             for (auto const& seq: coll) {
-                int step = 1;//floor(sqrt(seq.docs.size()));
+                int step = floor(sqrt(seq.docs.size()));
                 upperbounds_offset.push_back(max_term_weight.size());
                 for (size_t i = 0; i < seq.docs.size(); i += step) {
                     float max_score = 0;
