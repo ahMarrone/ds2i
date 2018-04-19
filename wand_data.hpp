@@ -39,6 +39,7 @@ namespace ds2i {
             for (auto const& seq: coll) {
                 int step = floor(sqrt(seq.docs.size()));
                 upperbounds_offset.push_back(max_term_weight.size());
+                std::cout << upperbounds_offset.size() << " " << max_term_weight.size() << std::endl;
                 for (size_t i = 0; i < seq.docs.size(); i += step) {
                     float max_score = 0;
                     for (size_t j = i; j < seq.docs.size(); j++){
@@ -75,10 +76,12 @@ namespace ds2i {
         std::vector<float> get_upper_bounds_vector(uint64_t term_id) const
         {
             std::vector<float> result;
-            int startPos = m_upperbounds_offset[term_id];
-            int endPos = ( term_id < (m_upperbounds_offset.size())-1 ) 
+            //            std::cout << term_id << " " << term_id+1 << std::endl;
+            unsigned int startPos = m_upperbounds_offset[term_id];
+            unsigned int endPos = ( term_id < (m_upperbounds_offset.size())-1 ) 
                         ? m_upperbounds_offset[term_id+1]
                         : m_max_term_weight.size();
+            //std::cout << term_id << " " <<  m_upperbounds_offset[term_id] << " " <<  m_upperbounds_offset[term_id+1] << std::endl;
             for(int i = startPos; i < endPos; i = i + 2) {
                 //std::cout << i << " inject: " << max_term_weight(i) << " " << max_term_weight(i+1)  << std::endl;
                 result.push_back(max_term_weight(i));

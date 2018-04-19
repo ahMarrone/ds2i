@@ -12,6 +12,15 @@ namespace ds2i {
     typedef uint32_t term_id_type;
     typedef std::vector<term_id_type> term_id_vec;
 
+
+    struct output_result
+    {
+        double num_results;
+        double extra_time;
+        std::vector<float> topk;
+    };
+
+
     bool read_query(term_id_vec& ret, std::istream& is = std::cin)
     {
         ret.clear();
@@ -36,9 +45,12 @@ namespace ds2i {
     struct and_query {
 
         template <typename Index>
-        uint64_t operator()(Index const& index, term_id_vec terms) const
+        struct output_result operator()(Index const& index, term_id_vec terms) const
         {
-            if (terms.empty()) return 0;
+            if (terms.empty()){
+                output_result out = {0,0};
+                return out;
+            };
             remove_duplicate_terms(terms);
 
             typedef typename Index::document_enumerator enum_type;
@@ -80,8 +92,11 @@ namespace ds2i {
                     i = 1;
                 }
             }
-
-            return results;
+            //double return_data[] = {results,0};
+            struct output_result out_result;
+            out_result.num_results = results;
+            out_result.extra_time = 0;
+            return out_result;
         }
     };
 
@@ -89,9 +104,12 @@ namespace ds2i {
     struct or_query {
 
         template <typename Index>
-        uint64_t operator()(Index const& index, term_id_vec terms) const
+        struct output_result operator()(Index const& index, term_id_vec terms) const
         {
-            if (terms.empty()) return 0;
+            if (terms.empty()){
+                output_result out = {0,0};
+                return out;
+            };
             remove_duplicate_terms(terms);
 
             typedef typename Index::document_enumerator enum_type;
@@ -125,8 +143,11 @@ namespace ds2i {
 
                 cur_doc = next_doc;
             }
-
-            return results;
+            //double return_data[] = {results,0};
+            struct output_result out_result;
+            out_result.num_results = results;
+            out_result.extra_time = 0;
+            return out_result;
         }
     };
 
@@ -207,10 +228,13 @@ namespace ds2i {
         {}
 
         template <typename Index>
-        uint64_t operator()(Index const& index, term_id_vec const& terms)
+        struct output_result operator()(Index const& index, term_id_vec const& terms)
         {
             m_topk.clear();
-            if (terms.empty()) return 0;
+            if (terms.empty()){
+                output_result out = {0,0};
+                return out;
+            }
 
             auto query_term_freqs = query_freqs(terms);
 
@@ -308,12 +332,15 @@ namespace ds2i {
 
             m_topk.finalize();
     
-            std::cout << "Showing topk scores..." << std::endl;
+            /*std::cout << "Showing topk scores..." << std::endl;
             for (auto score: m_topk.topk()){
                 std::cout << score << std::endl;
-            }
-
-            return m_topk.topk().size();
+            }*/
+            struct output_result out_result;
+            out_result.num_results = m_topk.topk().size();
+            out_result.extra_time = 0;
+            out_result.topk = m_topk.topk();
+            return out_result;
         }
 
         std::vector<float> const& topk() const
@@ -337,10 +364,13 @@ namespace ds2i {
         {}
 
         template <typename Index>
-        uint64_t operator()(Index const& index, term_id_vec terms)
+        struct output_result operator()(Index const& index, term_id_vec terms)
         {
             m_topk.clear();
-            if (terms.empty()) return 0;
+            if (terms.empty()){
+                output_result out = {0,0};
+                return out;
+            }
 
             auto query_term_freqs = query_freqs(terms);
 
@@ -397,12 +427,12 @@ namespace ds2i {
 
             m_topk.finalize();
 
-            std::cout << "Showing topk scores..." << std::endl;
-            for (auto score: m_topk.topk()){
-                std::cout << score << std::endl;
-            }
-
-            return m_topk.topk().size();
+            //double return_data[] = {m_topk.topk().size(),0};
+            struct output_result out_result;
+            out_result.num_results = m_topk.topk().size();;
+            out_result.extra_time = 0;
+            out_result.topk = m_topk.topk();
+            return out_result;
         }
 
         std::vector<float> const& topk() const
@@ -426,10 +456,13 @@ namespace ds2i {
         {}
 
         template <typename Index>
-        uint64_t operator()(Index const& index, term_id_vec terms)
+        struct output_result operator()(Index const& index, term_id_vec terms)
         {
             m_topk.clear();
-            if (terms.empty()) return 0;
+            if (terms.empty()){
+                output_result out = {0,0};
+                return out;
+            }
 
             auto query_term_freqs = query_freqs(terms);
 
@@ -479,12 +512,12 @@ namespace ds2i {
 
             m_topk.finalize();
 
-            std::cout << "Showing topk scores..." << std::endl;
-            for (auto score: m_topk.topk()){
-                std::cout << score << std::endl;
-            }
-
-            return m_topk.topk().size();
+            //double return_data[] = {m_topk.topk().size(),0};
+            struct output_result out_result;
+            out_result.num_results = m_topk.topk().size();;
+            out_result.extra_time = 0;
+            out_result.topk = m_topk.topk();
+            return out_result;
         }
 
         std::vector<float> const& topk() const
@@ -507,10 +540,13 @@ namespace ds2i {
         {}
 
         template <typename Index>
-        uint64_t operator()(Index const& index, term_id_vec const& terms)
+        struct output_result operator()(Index const& index, term_id_vec const& terms)
         {
             m_topk.clear();
-            if (terms.empty()) return 0;
+            if (terms.empty()){
+                output_result out = {0,0};
+                return out;
+            }
 
             auto query_term_freqs = query_freqs(terms);
 
@@ -567,8 +603,7 @@ namespace ds2i {
                 float score = 0;
                 float norm_len = m_wdata->norm_len(cur_doc);
                 uint64_t next_doc = index.num_docs();
-                std::cout << "Scoring: " << std::endl;
-                std::cout << cur_doc << std::endl;
+                //std::cout << "Scoring " << cur_doc << std::endl;
                 for (size_t i = non_essential_lists; i < ordered_enums.size(); ++i) {
                     if (ordered_enums[i]->docs_enum.docid() == cur_doc) {
                         //score += ordered_enums[i]->q_weight * scorer_type::doc_term_weight
@@ -597,7 +632,7 @@ namespace ds2i {
                 }
 
                 if (m_topk.insert(score)) {
-                    std::cout << "insert " << score << "  " << cur_doc << " " << m_topk.topk().size() << std::endl; 
+                    //std::cout << "insert " << score << "  " << cur_doc << " " << m_topk.topk().size() << std::endl; 
                     // update non-essential lists
                     while (non_essential_lists < ordered_enums.size() &&
                            !m_topk.would_enter(upper_bounds[non_essential_lists])) {
@@ -611,12 +646,17 @@ namespace ds2i {
             m_topk.finalize();
 
 
-            std::cout << "Showing topk scores..." << std::endl;
+            /*std::cout << "Showing topk scores..." << std::endl;
             for (auto score: m_topk.topk()){
                 std::cout << score << std::endl;
-            }
+            }*/
 
-            return m_topk.topk().size();
+            //double return_data[] = {m_topk.topk().size(),0};
+            struct output_result out_result;
+            out_result.num_results = m_topk.topk().size();;
+            out_result.extra_time = 0;
+            out_result.topk = m_topk.topk();
+            return out_result;
         }
 
         std::vector<float> const& topk() const
@@ -641,14 +681,20 @@ namespace ds2i {
         {}
 
         template <typename Index>
-        uint64_t operator()(Index const& index, term_id_vec const& terms)
+        struct output_result operator()(Index const& index, term_id_vec const& terms)
         {
             m_topk.clear();
-            if (terms.empty()) return 0;
+            if (terms.empty()){
+                output_result out = {0,0};
+                return out;
+            }
 
             auto query_term_freqs = query_freqs(terms);
 
             uint64_t num_docs = index.num_docs();
+
+            double total_extra_time = 0;
+            
             typedef typename Index::document_enumerator enum_type;
             struct scored_enum {
                 enum_type docs_enum;
@@ -657,24 +703,51 @@ namespace ds2i {
                 int upper_bound_cursor;
 
                 float get_current_max_weight(){
-                    //std::cout << "CURRENT DOC " <<  this->docs_enum.docid() << " " << this->max_weights.size() <<std::endl;
+                    //std::cout << "get_current_max_weight " <<  this->docs_enum.position() << " " << this->docs_enum.docid() <<std::endl;
                     //std::cout << this->docs_enum.position() << std::endl;
                     //std::cout << this->docs_enum.docid() << std::endl;
+                    /*while (
+                            (this->upper_bound_cursor <= (this->max_weights.size() - 2)) &&
+                            this->max_weights[this->upper_bound_cursor] <= this->docs_enum.position()
+
+                    ){*/
                     while (
                             (this->upper_bound_cursor < (this->max_weights.size() - 2)) &&
-                            this->max_weights[this->upper_bound_cursor] < this->docs_enum.position()
-
+                            (this->max_weights[this->upper_bound_cursor+2] <= this->docs_enum.position())
                     ){
                             this->upper_bound_cursor += 2; // move two steps to right -> ublist is => (pos, ub)
                             //std::cout << "UPPER " << std::endl;
 			    //std::cout << this->max_weights.size() << std::endl;
                             //std::cout << this->upper_bound_cursor << std::endl;
+                            if (this->upper_bound_cursor == (this->max_weights.size() - 2)){
+                                break;
+                            }
                     }
-		    //std::cout << "CURRENT MAX WEIGHT: " << std::endl;
+                    //this->upper_bound_cursor -= 2;
+		            //std::cout << "CURRENT MAX WEIGHT: " << std::endl;
                     //std::cout << this->max_weights.size() << std::endl;
-		    //std::cout << this->max_weights[this->upper_bound_cursor+1] << std::endl;
+		            //std::cout << this->max_weights[this->upper_bound_cursor+1] << std::endl;
                     return this->max_weights[this->upper_bound_cursor+1]; // return ub
                 }
+
+
+                void print_posting(){
+                    std::cout << "Print posting" << std::endl;
+                    while (this->docs_enum.position() < this->docs_enum.size()){
+                        std::cout << this->docs_enum.docid()  << ";" << this->docs_enum.freq() << std::endl;
+                        this->docs_enum.next();
+                    }
+                }
+
+
+
+                void print_upper_bounds(){
+                    std::cout << "Print upperbounds" << std::endl;
+                    for (size_t i = 0; i < this->max_weights.size(); i += 2){
+                        std::cout << this->max_weights[i]  << ";" << this->max_weights[i+1] << std::endl;
+                    }
+                }
+
 
 
                 void next(){
@@ -714,6 +787,8 @@ namespace ds2i {
                                             m_wdata->get_upper_bounds_vector(term.first), 
                                             0
                                 });
+                //enums[enums.size()-1].print_posting();
+                //enums[enums.size()-1].print_upper_bounds();
                 idx++;
             }
 
@@ -756,8 +831,7 @@ namespace ds2i {
                 float score = 0;
                 float norm_len = m_wdata->norm_len(cur_doc);
                 uint64_t next_doc = index.num_docs();
-                std::cout << "Scoring: " << std::endl;
-                std::cout << cur_doc << std::endl;
+                //std::cout << "Scoring " << cur_doc << std::endl;
                 for (size_t i = non_essential_lists; i < ordered_enums.size(); ++i) {
                     if (ordered_enums[i]->docs_enum.docid() == cur_doc) {
                         //std::cout << "Add score " << i << cur_doc << std::endl;
@@ -770,7 +844,7 @@ namespace ds2i {
                     }
                     //std::cout << "next doc check" << next_doc << std::endl;
                     if (ordered_enums[i]->docs_enum.docid() < next_doc) {
-                        next_doc = ordered_enums[i]->docs_enum.docid();
+                        //next_doc = ordered_enums[i]->docs_enum.docid();
                         //std::cout << "next " << next_doc << std::endl;
                     }
                 }
@@ -799,17 +873,12 @@ namespace ds2i {
                 non_essential_lists = 0;
 
                 if (m_topk.insert(score)){
-                    std::cout << "insert " << score << "  " << cur_doc << " " << m_topk.topk().size() << std::endl; 
-                }
-                 while (non_essential_lists < ordered_enums.size() &&
-                        !m_topk.would_enter(upper_bounds[non_essential_lists])) {
-                        //std::cout << "Updating non-essential" << std::endl;
-                        non_essential_lists += 1;
-                        //std::cout << non_essential_lists << std::endl;
+                    //std::cout << "insert " << score << "  " << cur_doc << " " << m_topk.topk().size() << std::endl; 
                 }
 
                  //////////// AGREGADO!!!!! ///////////////
                 // sort enumerators by increasing maxscore
+                auto first_tick = get_time_usecs();
                 std::sort(ordered_enums.begin(), ordered_enums.end(),
                     [](scored_enum* lhs, scored_enum* rhs) {
                         return lhs->get_current_max_weight() < rhs->get_current_max_weight();
@@ -823,19 +892,43 @@ namespace ds2i {
                 for (size_t i = 1; i < ordered_enums.size(); ++i) {
                     upper_bounds[i] = upper_bounds[i - 1] + ordered_enums[i]->get_current_max_weight();
                 }
+                total_extra_time += double(get_time_usecs() - first_tick);
 
+
+                while (non_essential_lists < ordered_enums.size() &&
+                        !m_topk.would_enter(upper_bounds[non_essential_lists])) {
+                        //std::cout << "Updating non-essential" << std::endl;
+                        non_essential_lists += 1;
+                        //std::cout << non_essential_lists << std::endl;
+                }
+
+		        //std::cout << "Checking " << next_doc << std::endl;
+		        for (size_t k = 0; k < ordered_enums.size(); ++k){
+                    
+                    //std::cout << "es menor ? probando: " <<   ordered_enums[k]->docs_enum.docid() << std::endl;
+                    if (ordered_enums[k]->docs_enum.docid()  < next_doc){
+                            
+                        //std::cout << "next " <<   ordered_enums[k]->docs_enum.docid() << std::endl;
+                        next_doc = ordered_enums[k]->docs_enum.docid();
+                    }
+                }
                 //std::cout << "first docid" << cur_doc << std::endl;
                 cur_doc = next_doc;
             }
 
             m_topk.finalize();
 
-            std::cout << "Showing topk scores..." << std::endl;
+            
+            /*std::cout << "Showing topk scores..." << std::endl;
             for (auto score: m_topk.topk()){
                 std::cout << score << std::endl;
-            }
+            }*/
 
-            return m_topk.topk().size();
+            struct output_result out_result;
+            out_result.num_results = m_topk.topk().size();
+            out_result.extra_time = total_extra_time;
+            out_result.topk = m_topk.topk();
+            return out_result;
         }
 
         std::vector<float> const& topk() const

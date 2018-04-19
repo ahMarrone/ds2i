@@ -10,6 +10,8 @@
 #include "queries.hpp"
 #include "util.hpp"
 
+const bool IS_DEBBUGING = true;
+
 template <typename QueryOperator, typename IndexType>
 void op_perftest(IndexType const& index,
                  QueryOperator&& query_op, // XXX!!!
@@ -23,14 +25,18 @@ void op_perftest(IndexType const& index,
     std::vector<double> query_times;
     for (size_t run = 0; run <= runs; ++run) {
         for (auto const& query: queries) {
-            std::cout << "query: " << std::endl;
-            for (auto q: query){
-                std::cout << q << std::endl;
-            }
             auto tick = get_time_usecs();
-            uint64_t result = query_op(index, query);
+            output_result out_result = query_op(index, query); // result[0] -> topk.size(); result[1] -> extra time required
+            uint64_t result = out_result.num_results;
             do_not_optimize_away(result);
             double elapsed = double(get_time_usecs() - tick);
+            elapsed -= out_result.extra_time;
+            if (IS_DEBBUGING){
+                std::cout << "Showing topk scores..." << std::endl;
+                for (auto score: out_result.topk){
+                    std::cout << score << std::endl;
+                }
+            }
             if (run != 0) { // first run is not timed
                 //std::cout << elapsed << std::endl;
                 query_times.push_back(elapsed);
