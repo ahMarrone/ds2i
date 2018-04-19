@@ -25,6 +25,10 @@ void op_perftest(IndexType const& index,
     std::vector<double> query_times;
     for (size_t run = 0; run <= runs; ++run) {
         for (auto const& query: queries) {
+            std::cout << "query: " << std::endl;
+            for (auto q: query){
+                std::cout << q << std::endl;
+            }
             auto tick = get_time_usecs();
             output_result out_result = query_op(index, query); // result[0] -> topk.size(); result[1] -> extra time required
             uint64_t result = out_result.num_results;
