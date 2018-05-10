@@ -38,8 +38,11 @@ namespace ds2i {
             int upp_offset = 0;
             for (auto const& seq: coll) {
                 int step = floor(sqrt(seq.docs.size()));
+                //int step = 1;
+                //int step = (seq.docs.size() == 1) ? 1 : floor(seq.docs.size()/2);
+                //std::cout << seq.docs.size() << " " << step << std::endl;
                 upperbounds_offset.push_back(max_term_weight.size());
-                std::cout << upperbounds_offset.size() << " " << max_term_weight.size() << std::endl;
+                //std::cout << upperbounds_offset.size() << " " << max_term_weight.size() << std::endl;
                 for (size_t i = 0; i < seq.docs.size(); i += step) {
                     float max_score = 0;
                     for (size_t j = i; j < seq.docs.size(); j++){

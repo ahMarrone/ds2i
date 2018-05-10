@@ -23,6 +23,7 @@ void op_perftest(IndexType const& index,
     using namespace ds2i;
 
     std::vector<double> query_times;
+    unsigned int global_docs_processed = 0;
     for (size_t run = 0; run <= runs; ++run) {
         for (auto const& query: queries) {
             std::cout << "query: " << std::endl;
@@ -35,6 +36,7 @@ void op_perftest(IndexType const& index,
             do_not_optimize_away(result);
             double elapsed = double(get_time_usecs() - tick);
             elapsed -= out_result.extra_time;
+            global_docs_processed += out_result.docs_processed;
             if (IS_DEBBUGING){
                 std::cout << "Showing topk scores..." << std::endl;
                 for (auto score: out_result.topk){
@@ -63,6 +65,7 @@ void op_perftest(IndexType const& index,
         logger() << "50% quantile: " << q50 << std::endl;
         logger() << "90% quantile: " << q90 << std::endl;
         logger() << "95% quantile: " << q95 << std::endl;
+        logger() << "DOCS Processed: " << global_docs_processed << std::endl;
 
         stats_line()
             ("type", index_type)

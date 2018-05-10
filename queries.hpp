@@ -17,6 +17,7 @@ namespace ds2i {
     {
         double num_results;
         double extra_time;
+        unsigned int docs_processed;
         std::vector<float> topk;
     };
 
@@ -47,9 +48,9 @@ namespace ds2i {
         template <typename Index>
         struct output_result operator()(Index const& index, term_id_vec terms) const
         {
+            output_result out_result = {0, 0, 0};
             if (terms.empty()){
-                output_result out = {0,0};
-                return out;
+                return out_result;
             };
             remove_duplicate_terms(terms);
 
@@ -92,10 +93,8 @@ namespace ds2i {
                     i = 1;
                 }
             }
-            //double return_data[] = {results,0};
-            struct output_result out_result;
+
             out_result.num_results = results;
-            out_result.extra_time = 0;
             return out_result;
         }
     };
@@ -106,9 +105,9 @@ namespace ds2i {
         template <typename Index>
         struct output_result operator()(Index const& index, term_id_vec terms) const
         {
+            output_result out_result = {0, 0, 0};
             if (terms.empty()){
-                output_result out = {0,0};
-                return out;
+                return out_result;
             };
             remove_duplicate_terms(terms);
 
@@ -143,10 +142,8 @@ namespace ds2i {
 
                 cur_doc = next_doc;
             }
-            //double return_data[] = {results,0};
-            struct output_result out_result;
+
             out_result.num_results = results;
-            out_result.extra_time = 0;
             return out_result;
         }
     };
@@ -231,9 +228,9 @@ namespace ds2i {
         struct output_result operator()(Index const& index, term_id_vec const& terms)
         {
             m_topk.clear();
+            output_result out_result = {0, 0, 0};
             if (terms.empty()){
-                output_result out = {0,0};
-                return out;
+                return out_result;
             }
 
             auto query_term_freqs = query_freqs(terms);
@@ -328,17 +325,12 @@ namespace ds2i {
                         }
                     }
                 }
+                out_result.docs_processed += 1;
             }
 
             m_topk.finalize();
     
-            /*std::cout << "Showing topk scores..." << std::endl;
-            for (auto score: m_topk.topk()){
-                std::cout << score << std::endl;
-            }*/
-            struct output_result out_result;
             out_result.num_results = m_topk.topk().size();
-            out_result.extra_time = 0;
             out_result.topk = m_topk.topk();
             return out_result;
         }
@@ -367,9 +359,9 @@ namespace ds2i {
         struct output_result operator()(Index const& index, term_id_vec terms)
         {
             m_topk.clear();
+            output_result out_result = {0, 0, 0};
             if (terms.empty()){
-                output_result out = {0,0};
-                return out;
+                return out_result;
             }
 
             auto query_term_freqs = query_freqs(terms);
@@ -427,10 +419,7 @@ namespace ds2i {
 
             m_topk.finalize();
 
-            //double return_data[] = {m_topk.topk().size(),0};
-            struct output_result out_result;
             out_result.num_results = m_topk.topk().size();;
-            out_result.extra_time = 0;
             out_result.topk = m_topk.topk();
             return out_result;
         }
@@ -459,9 +448,9 @@ namespace ds2i {
         struct output_result operator()(Index const& index, term_id_vec terms)
         {
             m_topk.clear();
+            output_result out_result = {0, 0, 0};
             if (terms.empty()){
-                output_result out = {0,0};
-                return out;
+                return out_result;
             }
 
             auto query_term_freqs = query_freqs(terms);
@@ -512,10 +501,7 @@ namespace ds2i {
 
             m_topk.finalize();
 
-            //double return_data[] = {m_topk.topk().size(),0};
-            struct output_result out_result;
-            out_result.num_results = m_topk.topk().size();;
-            out_result.extra_time = 0;
+            out_result.num_results = m_topk.topk().size();
             out_result.topk = m_topk.topk();
             return out_result;
         }
@@ -543,9 +529,9 @@ namespace ds2i {
         struct output_result operator()(Index const& index, term_id_vec const& terms)
         {
             m_topk.clear();
+            output_result out_result = {0, 0, 0};
             if (terms.empty()){
-                output_result out = {0,0};
-                return out;
+                return out_result;
             }
 
             auto query_term_freqs = query_freqs(terms);
@@ -641,20 +627,12 @@ namespace ds2i {
                 }
 
                 cur_doc = next_doc;
+                out_result.docs_processed += 1;
             }
 
             m_topk.finalize();
 
-
-            /*std::cout << "Showing topk scores..." << std::endl;
-            for (auto score: m_topk.topk()){
-                std::cout << score << std::endl;
-            }*/
-
-            //double return_data[] = {m_topk.topk().size(),0};
-            struct output_result out_result;
             out_result.num_results = m_topk.topk().size();;
-            out_result.extra_time = 0;
             out_result.topk = m_topk.topk();
             return out_result;
         }
@@ -684,11 +662,11 @@ namespace ds2i {
         struct output_result operator()(Index const& index, term_id_vec const& terms)
         {
             m_topk.clear();
+            output_result out_result = {0, 0, 0};
             if (terms.empty()){
-                output_result out = {0,0};
-                return out;
+                return out_result;
             }
-
+            
             auto query_term_freqs = query_freqs(terms);
 
             uint64_t num_docs = index.num_docs();
@@ -701,6 +679,7 @@ namespace ds2i {
                 float q_weight;
                 std::vector<float> max_weights;
                 int upper_bound_cursor;
+                unsigned int total_jumps;
 
                 float get_current_max_weight(){
                     //std::cout << "get_current_max_weight " <<  this->docs_enum.position() << " " << this->docs_enum.docid() <<std::endl;
@@ -759,8 +738,9 @@ namespace ds2i {
 
 
                 void next_geq(int doc_id){
+                    uint64_t prev_pos = this->docs_enum.position();
                     this->docs_enum.next_geq(doc_id);
-                    //std::cout << "GEQ position" << std::endl;
+                    this->total_jumps += this->docs_enum.position() - prev_pos;
                     //std::cout << this->docs_enum.position() << std::endl;
                     //this->upper_bound_cursor = this->docs_enum.position();
                 }
@@ -782,9 +762,13 @@ namespace ds2i {
                 std::cout << term.second << std::endl;
                 std::cout << list.size()  << std::endl;*/
                 //std::cout << "MAX WEIGHT ->" << term.first << " " << m_wdata->get_upper_bounds_vector(term.first)[1] << std::endl;
+                auto first_tick = get_time_usecs();
+                std::vector<float> term_w_data = m_wdata->get_upper_bounds_vector(term.first);
+                out_result.extra_time += double(get_time_usecs() - first_tick);
                 enums.push_back(scored_enum {std::move(list), 
                                             q_weight, 
-                                            m_wdata->get_upper_bounds_vector(term.first), 
+                                            term_w_data, 
+                                            0,
                                             0
                                 });
                 //enums[enums.size()-1].print_posting();
@@ -892,7 +876,7 @@ namespace ds2i {
                 for (size_t i = 1; i < ordered_enums.size(); ++i) {
                     upper_bounds[i] = upper_bounds[i - 1] + ordered_enums[i]->get_current_max_weight();
                 }
-                total_extra_time += double(get_time_usecs() - first_tick);
+                out_result.extra_time += double(get_time_usecs() - first_tick);
 
 
                 while (non_essential_lists < ordered_enums.size() &&
@@ -914,6 +898,7 @@ namespace ds2i {
                 }
                 //std::cout << "first docid" << cur_doc << std::endl;
                 cur_doc = next_doc;
+                out_result.docs_processed += 1;
             }
 
             m_topk.finalize();
@@ -924,9 +909,7 @@ namespace ds2i {
                 std::cout << score << std::endl;
             }*/
 
-            struct output_result out_result;
             out_result.num_results = m_topk.topk().size();
-            out_result.extra_time = total_extra_time;
             out_result.topk = m_topk.topk();
             return out_result;
         }
