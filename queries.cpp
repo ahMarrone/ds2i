@@ -10,7 +10,7 @@
 #include "queries.hpp"
 #include "util.hpp"
 
-const bool IS_DEBBUGING = true;
+const bool IS_DEBBUGING = false;
 
 template <typename QueryOperator, typename IndexType>
 void op_perftest(IndexType const& index,
@@ -23,28 +23,36 @@ void op_perftest(IndexType const& index,
     using namespace ds2i;
 
     std::vector<double> query_times;
-    unsigned int global_docs_processed = 0;
+    unsigned int global_docs_processed;
+    unsigned int global_sorts_realized;
     for (size_t run = 0; run <= runs; ++run) {
+        global_docs_processed = 0;
+        global_sorts_realized = 0;
         for (auto const& query: queries) {
-            std::cout << "query: " << std::endl;
-            for (auto q: query){
-                std::cout << q << std::endl;
+            if (IS_DEBBUGING){
+                std::cout << "query: " << std::endl;
+                for (auto q: query){
+                    std::cout << q << std::endl;
+                }
             }
             auto tick = get_time_usecs();
             output_result out_result = query_op(index, query); // result[0] -> topk.size(); result[1] -> extra time required
             uint64_t result = out_result.num_results;
             do_not_optimize_away(result);
             double elapsed = double(get_time_usecs() - tick);
+            //std::cout << elapsed << std::endl;
             elapsed -= out_result.extra_time;
+            //std::cout << elapsed << std::endl;
             global_docs_processed += out_result.docs_processed;
+            global_sorts_realized += out_result.sorts_realized;
             if (IS_DEBBUGING){
                 std::cout << "Showing topk scores..." << std::endl;
                 for (auto score: out_result.topk){
                     std::cout << score << std::endl;
                 }
             }
-            if (run != 0) { // first run is not timed
-                //std::cout << elapsed << std::endl;
+            if (run == runs) { // first run is not timed -- time last run
+                std::cout << elapsed << std::endl;
                 query_times.push_back(elapsed);
             }
         }
@@ -66,6 +74,7 @@ void op_perftest(IndexType const& index,
         logger() << "90% quantile: " << q90 << std::endl;
         logger() << "95% quantile: " << q95 << std::endl;
         logger() << "DOCS Processed: " << global_docs_processed << std::endl;
+        logger() << "SORTS realized: " << global_sorts_realized << std::endl;
 
         stats_line()
             ("type", index_type)
@@ -137,6 +146,8 @@ void perftest(const char* index_filename,
             op_perftest(index, maxscore_query(wdata, K), queries, type, t, RUNS_NUMBER);
         } else if (t == "maxscore_dyn" && wand_data_filename) {
             op_perftest(index, maxscore_dyn_query(wdata, K), queries, type, t, RUNS_NUMBER);
+        } else if (t == "maxscore_smart_dyn" && wand_data_filename) {
+            op_perftest(index, maxscore_smart_dyn_query(wdata, K), queries, type, t, RUNS_NUMBER);
         } else {
             logger() << "Unsupported query type: " << t << std::endl;
         }
@@ -147,7 +158,7 @@ int main(int argc, const char** argv)
 {
     using namespace ds2i;
 
-    std::string type = argv[1];
+     std::string type = argv[1];
     std::string query_type = argv[2];
     const char* index_filename = argv[3];
     const char* wand_data_filename = nullptr;
