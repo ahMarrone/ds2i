@@ -34,7 +34,7 @@ namespace ds2i {
 
             logger() << "Storing max weight for each list..." << std::endl;
             std::vector<float> max_term_weight;
-            std::vector<float> upperbounds_offset;
+            std::vector<uint64_t> upperbounds_offset;
             int upp_offset = 0;
             for (auto const& seq: coll) {
                 int step = floor(sqrt(seq.docs.size()));
@@ -74,12 +74,10 @@ namespace ds2i {
         {
             return m_max_term_weight[term_id];
         }
-
-
+        
         std::vector<float> get_upper_bounds_vector(uint64_t term_id) const
         {
             std::vector<float> result;
-            //            std::cout << term_id << " " << term_id+1 << std::endl;
             unsigned int startPos = m_upperbounds_offset[term_id];
             unsigned int endPos = ( term_id < (m_upperbounds_offset.size())-1 ) 
                         ? m_upperbounds_offset[term_id+1]
@@ -94,7 +92,7 @@ namespace ds2i {
         }
 
 
-        int upperbounds_offset(uint64_t term_id) const{
+        uint64_t upperbounds_offset(uint64_t term_id) const{
             return m_upperbounds_offset[term_id];
         }
 
@@ -119,7 +117,7 @@ namespace ds2i {
     private:
         succinct::mapper::mappable_vector<float> m_norm_lens;
         succinct::mapper::mappable_vector<float> m_max_term_weight;
-        succinct::mapper::mappable_vector<float> m_upperbounds_offset;
+        succinct::mapper::mappable_vector<uint64_t> m_upperbounds_offset;
     };
 
 }
