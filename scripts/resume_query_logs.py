@@ -10,12 +10,12 @@ lexicon_file_path = sys.argv[2]
 # Archivo de log generado luego de correr ./queries en ds2i
 query_log_file_path = sys.argv[3]
 
-colorized_output = sys.argv[4]
-
 ########
 
 QUERY_TYPES = ["maxscore", "maxscore_smart_dyn"]
 N_QUERIES = int(sys.argv[4])
+
+colorized_output = sys.argv[5]
 
 ## lexicon 
 lexicon_data = []
@@ -63,8 +63,8 @@ while threshold_info:
 
 # Ya tengo las tres listas con los tiempos de cada estrategia
 print "Q_DATA \t" + "LAST_THRESHOLD\t" + "\t".join(QUERY_TYPES) + "\t" + "DELTAS \t MIN\t MAX"
-min_counts = [0,0,0]
-max_counts = [0,0,0]
+min_counts = [0] * len(QUERY_TYPES)
+max_counts = [0] * len(QUERY_TYPES)
 for k in range(len(query_metadata[0])):
 	values = [l[k] for l in query_metadata]
 	minpos = values.index(min(values))
@@ -75,7 +75,7 @@ for k in range(len(query_metadata[0])):
 	postings_lengths = [lexicon_data[int(entry)][1] for entry in queries_list[k]]
 	time_deltas = [v - values[0] for v in values[1:]]
 	q_data = str(len(queries_list[k])) + ":" + ";".join(postings_lengths)
-	q_data = q_data + "\t" + str(thresholds_data[k]) + "\t" + str(values[0]) + "\t" + str(values[1]) + "\t" + ";".join(str(x) for x in time_deltas) + "\t" + str(minpos) + "\t" + str(maxpos)
+	q_data = q_data + "\t" + str(thresholds_data[k]) + "\t" + ";".join(str(x) for x in values) + "\t" + ";".join(str(x) for x in time_deltas) + "\t" + str(minpos) + "\t" + str(maxpos)
 	if colorized_output and (minpos == len(QUERY_TYPES)-1):
 		q_data = '\033[92m' + q_data + '\033[0m'
 	print q_data
