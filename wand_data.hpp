@@ -22,6 +22,7 @@ namespace ds2i {
             std::vector<float> norm_lens(num_docs);
             double lens_sum = 0;
             logger() << "Reading sizes..." << std::endl;
+            logger() << num_docs << std::endl;
             for (size_t i = 0; i < num_docs; ++i) {
                 float len = *len_it++;
                 norm_lens[i] = len;

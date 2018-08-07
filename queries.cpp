@@ -11,6 +11,8 @@
 #include "util.hpp"
 
 const bool IS_DEBBUGING = false;
+const bool SHOW_TOP_K = false;
+const bool SHOW_LAST_THRESHOLD = true;
 
 template <typename QueryOperator, typename IndexType>
 void op_perftest(IndexType const& index,
@@ -45,16 +47,22 @@ void op_perftest(IndexType const& index,
             //std::cout << elapsed << std::endl;
             global_docs_processed += out_result.docs_processed;
             global_sorts_realized += out_result.sorts_realized;
-            if (IS_DEBBUGING){
+            if (SHOW_TOP_K){
                 std::cout << "Showing topk scores..." << std::endl;
                 for (auto score: out_result.topk){
                     std::cout << score << std::endl;
                 }
             }
-            if (run == runs) { // first run is not timed -- time last run
+            // first run is not timed
+            // print time last run && query time
+            if (run == runs) {
+                if (SHOW_LAST_THRESHOLD && out_result.topk.size() > 0){
+                    std::cout << out_result.topk[out_result.topk.size()-1] << std::endl;
+                }
                 std::cout << elapsed << std::endl;
                 query_times.push_back(elapsed);
             }
+
         }
     }
 

@@ -140,7 +140,7 @@ namespace ds2i {
                         next_doc = enums[i].docid();
                     }
                 }
-
+                out_result.docs_processed += 1;
                 cur_doc = next_doc;
             }
 
@@ -498,6 +498,7 @@ namespace ds2i {
 
                 m_topk.insert(score);
                 cur_doc = next_doc;
+                out_result.docs_processed += 1;
             }
 
             m_topk.finalize();
@@ -627,7 +628,6 @@ namespace ds2i {
                         non_essential_lists += 1;
                     }
                 }
-
                 cur_doc = next_doc;
                 out_result.docs_processed += 1;
             }
