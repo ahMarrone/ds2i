@@ -53,8 +53,10 @@ namespace ds2i {
                         float score = freq;
                         max_score = std::max(max_score, score);
                     }
-                    max_term_weight.push_back(i);
-                    max_term_weight.push_back(max_score);
+                    if ((i == 0) || (i > 0 && max_score != max_term_weight[max_term_weight.size()-1])){
+                        max_term_weight.push_back(i);
+                        max_term_weight.push_back(max_score);
+                    }
                 }
                 if ((max_term_weight.size() % 1000000) == 0) {
                     logger() << max_term_weight.size() << " list processed" << std::endl;
@@ -79,11 +81,13 @@ namespace ds2i {
         std::vector<float> get_upper_bounds_vector(uint64_t term_id) const
         {
             std::vector<float> result;
+            //std::cout << m_upperbounds_offset.size() << std::endl;
             unsigned int startPos = m_upperbounds_offset[term_id];
             unsigned int endPos = ( term_id < (m_upperbounds_offset.size())-1 ) 
                         ? m_upperbounds_offset[term_id+1]
                         : m_max_term_weight.size();
             //std::cout << term_id << " " <<  m_upperbounds_offset[term_id] << " " <<  m_upperbounds_offset[term_id+1] << std::endl;
+            //std::cout << startPos << "  " << endPos << std::endl;
             for(int i = startPos; i < endPos; i = i + 2) {
                 //std::cout << i << " inject: " << max_term_weight(i) << " " << max_term_weight(i+1)  << std::endl;
                 result.push_back(max_term_weight(i));

@@ -134,7 +134,7 @@ void perftest(const char* index_filename,
     logger() << "Performing " << type << " queries" << std::endl;
     for (auto const& t: query_types) {
         logger() << "Query type: " << t << std::endl;
-        int RUNS_NUMBER = 1;
+        int RUNS_NUMBER = 2;
         int K = 10;
         if (t == "and") {
             op_perftest(index, and_query<false>(), queries, type, t, RUNS_NUMBER);
