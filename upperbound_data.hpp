@@ -18,6 +18,8 @@ namespace ds2i {
         upperbound_data(LengthsIterator len_it, uint64_t num_docs,
                   binary_freq_collection const& coll)
         {
+            logger() << "Getting upperbounds positions..." << std::endl;
+            uint64_t idx = 0;
             for (auto const& seq: coll) {
                 float maxscore = 0;
                 uint64_t maxscore_position = 0;
@@ -29,6 +31,10 @@ namespace ds2i {
                     }
                 }
                 std::cout << seq.docs.size() << "\t" << maxscore_position << std::endl;
+                if ((idx % 100000) == 0) {
+                    logger() << idx << " lists processed" << std::endl;
+                }
+                idx += 1;
             }
         }
 
