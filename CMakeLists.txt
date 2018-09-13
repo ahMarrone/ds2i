@@ -68,6 +68,11 @@ target_link_libraries(create_wand_data
   ${Boost_LIBRARIES}
   )
 
+add_executable(get_upperbound_data get_upperbound_data.cpp)
+target_link_libraries(get_upperbound_data
+  ${Boost_LIBRARIES}
+  )
+
 add_executable(queries queries.cpp)
 target_link_libraries(queries
   ${Boost_LIBRARIES}
