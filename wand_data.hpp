@@ -49,8 +49,8 @@ namespace ds2i {
                     for (size_t j = i; j < seq.docs.size(); j++){
                         uint64_t docid = *(seq.docs.begin() + j);
                         uint64_t freq = *(seq.freqs.begin() + j);
-                        //float score = Scorer::doc_term_weight(freq, norm_lens[docid]);
-                        float score = freq;
+                        float score = Scorer::doc_term_weight(freq, norm_lens[docid]);
+                        //float score = freq;
                         max_score = std::max(max_score, score);
                     }
                     if ((i == 0) || (i > 0 && max_score != max_term_weight[max_term_weight.size()-1])){

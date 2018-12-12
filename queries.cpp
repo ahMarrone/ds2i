@@ -42,9 +42,7 @@ void op_perftest(IndexType const& index,
             uint64_t result = out_result.num_results;
             do_not_optimize_away(result);
             double elapsed = double(get_time_usecs() - tick);
-            //std::cout << elapsed << std::endl;
             elapsed -= out_result.extra_time;
-            //std::cout << elapsed << std::endl;
             global_docs_processed += out_result.docs_processed;
             global_sorts_realized += out_result.sorts_realized;
             if (SHOW_TOP_K){
@@ -134,7 +132,7 @@ void perftest(const char* index_filename,
     logger() << "Performing " << type << " queries" << std::endl;
     for (auto const& t: query_types) {
         logger() << "Query type: " << t << std::endl;
-        int RUNS_NUMBER = 2;
+        int RUNS_NUMBER = 1;
         int K = 10;
         if (t == "and") {
             op_perftest(index, and_query<false>(), queries, type, t, RUNS_NUMBER);

@@ -1,5 +1,5 @@
-idx_types="ef"
-query_types="maxscore:maxscore_smart_dyn"
+idx_types="opt"
+query_types="ranked_or:maxscore:maxscore_smart_dyn"
 
 
 COLLECTION_NAME=$1 # ej "test_collection" - coleccion .docs .freqs .sizes

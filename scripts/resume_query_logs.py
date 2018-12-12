@@ -14,7 +14,7 @@ ubdata_file_path = sys.argv[4]
 
 ########
 
-QUERY_TYPES = ["maxscore", "maxscore_smart_dyn"]
+QUERY_TYPES = ["ranked_or", "maxscore", "maxscore_smart_dyn"]
 N_QUERIES = int(sys.argv[5])
 
 colorized_output = sys.argv[6]
@@ -56,7 +56,7 @@ tmp_list = []
 threshold_info = query_log_file.readline()
 while threshold_info:
 	if (query_proccessed_number < N_QUERIES):
-		thresholds_data.append(int(threshold_info))
+		thresholds_data.append(float(threshold_info))
 		query_time = query_log_file.readline()
 		tmp_list.append(float(query_time))
 		threshold_info =  query_log_file.readline()
@@ -70,7 +70,7 @@ while threshold_info:
 		continue
 
 # Ya tengo las tres listas con los tiempos de cada estrategia
-print " MIN\tMAX\tQ_DATA\tUB_DATA\t" + "LAST_THRESHOLD\t" + "\t".join(QUERY_TYPES) + "\t" + "DELTAS"
+print "MIN\tMAX\tQ_DATA\tUB_DATA\t" + "LAST_THRESHOLD\t" + "\t".join(QUERY_TYPES) + "\t" + "DELTAS"
 min_counts = [0] * len(QUERY_TYPES)
 max_counts = [0] * len(QUERY_TYPES)
 for k in range(len(query_metadata[0])):
