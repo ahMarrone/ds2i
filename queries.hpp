@@ -303,7 +303,6 @@ namespace ds2i {
                         }
                         score += en->q_weight * scorer_type::doc_term_weight
                             (en->docs_enum.freq(), norm_len);
-                        score += en->q_weight * en->docs_enum.freq();
                         en->docs_enum.next();
                     }
 
