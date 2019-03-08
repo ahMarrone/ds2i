@@ -14,7 +14,7 @@ ubdata_file_path = sys.argv[4]
 
 ########
 
-QUERY_TYPES = ["ranked_or", "maxscore", "maxscore_smart_dyn"]
+QUERY_TYPES = ["ranked_or", "wand", "maxscore", "maxscore_smart_dyn"]
 N_QUERIES = int(sys.argv[5])
 
 colorized_output = sys.argv[6]
@@ -83,7 +83,7 @@ for k in range(len(query_metadata[0])):
 	postings_lengths = [lexicon_data[int(entry)][1] for entry in queries_list[k]]
 	ub_info = [ub_data[int(entry)] for entry in queries_list[k]]
 	time_deltas = [v - values[0] for v in values[1:]]
-	q_data = str(len(queries_list[k])) + ":" + ";".join(postings_lengths)
+	q_data = str(len(queries_list[k]))+ ":" + ";".join(queries_list[k]) + ":" + ";".join(postings_lengths)
 	q_data = str(minpos) + "\t" + str(maxpos) + "\t" + q_data + "\t" + ";".join(ub_info) + "\t" + str(thresholds_data[k]) + "\t" + ";".join(str(x) for x in values) + "\t" + ";".join(str(x) for x in time_deltas)
 	if colorized_output and (minpos == len(QUERY_TYPES)-1):
 		q_data = '\033[92m' + q_data + '\033[0m'
