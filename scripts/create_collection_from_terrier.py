@@ -14,7 +14,6 @@ path_inverted_index_file = sys.argv[1]
 #path_document_index_file = "/home/agustin/Documentos/Tesis/clueweb3M/textfiles/ClueWeb12_plain_documentindex_onlysizes.txt"
 path_document_index_file = sys.argv[2]
 
-#collection_size = 3229026
 collection_size = int(sys.argv[3])
 
 
