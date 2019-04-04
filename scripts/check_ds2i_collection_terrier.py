@@ -28,9 +28,9 @@ print "Sum: {}".format(sum(terms_df))
         
 
 
-def print_posting(posting_entries):
-    print("Term entries count: {}".format(len(posting_entries)))
-    #print posting_entries
+def check_posting_entries(posting_entries):
+    res = all(i < j for i, j in zip(posting_entries, posting_entries[1:])) 
+    return res
 
 #######
 
@@ -57,8 +57,8 @@ with ds2i_docs_file as f:
             if posting_size != terms_df[processed_terms]:
                 print "Error in term id: {}. Real posting size: {}. Saved posting size: {}".format(processed_terms, terms_df[processed_terms], posting_size)
             posting_entries = struct.unpack('<' + ('I'*posting_size), f.read(posting_size*4))
-            if processed_terms == inspect_term_id:
-                print_posting(posting_entries)
+            if not check_posting_entries(posting_entries):
+                print "ERROR! -> Invalid posting. ID: {}".format(processed_terms)
                 break
             processed_terms += 1
     if processed_terms != total_terms:
